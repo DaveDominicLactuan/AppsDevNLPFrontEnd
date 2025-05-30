@@ -1,0 +1,96 @@
+
+<div class="fullscreen-bg">
+  <div class="overlay-content">
+
+    <!-- Countdown button -->
+    <button *ngIf="!countdownStarted" (click)="startCountdownAndShowImage()">
+      Start Countdown
+    </button>
+
+     <div class="search-container">
+  <input
+    type="text"
+    [(ngModel)]="searchQuery"
+    class="search-input"
+    placeholder="youtube.com/123save"
+  />
+  <button (click)="startCountdownFetchAndDisplay()" class="search-button">
+    <span class="material-icons">search</span>
+  </button>
+
+</div>
+
+<div class="container">
+  <h2>YouTube Comments Scraper</h2>
+  <input [(ngModel)]="videoUrl" type="text" placeholder="Enter YouTube URL" />
+  <button (click)="fetchComments()">Fetch Comments</button>
+
+  <div *ngIf="loading">Loading...</div>
+  <div *ngIf="error" style="color:red">{{ error }}</div>
+
+  <ul *ngIf="comments.length > 0">
+    <li *ngFor="let comment of comments">{{ comment }}</li>
+  </ul>
+</div>
+
+
+
+
+    <!-- Image shown while countdown is running -->
+    <div
+      *ngIf="countdownStarted && !countdownDone"
+     
+    >
+<img src="assets/angular.png" alt="Angular Logo" class="resized-img"/>
+
+    </div>
+
+    <!-- Countdown display -->
+    <div *ngIf="countdownStarted && !countdownDone" class="count">
+      {{ countdown }}s
+    </div>
+
+    <!-- Final message -->
+    <div *ngIf="countdownDone" class="message">
+      Countdown Complete!
+    </div>
+
+
+  </div>
+
+  <div class="container">
+  <h2>YouTube Comments Scraper</h2>
+  <input [(ngModel)]="videoUrl" type="text" placeholder="Enter YouTube URL" />
+  <button (click)="startCountdownAndFetchComments()">Start</button>
+
+  <!-- Countdown display -->
+  <div *ngIf="countdownStarted && !countdownDone" class="count">
+    <img src="assets/angular.png" alt="Angular Logo" class="resized-img" />
+    <p>{{ countdown }}s</p>
+  </div>
+
+  <!-- Final message -->
+  <div *ngIf="countdownDone && !loading && comments.length > 0" class="message">
+    Countdown Complete!
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading">Loading comments...</div>
+
+  <!-- Error -->
+  <div *ngIf="error" style="color:red">{{ error }}</div>
+
+  <!-- Comments -->
+  <ul *ngIf="comments.length > 0">
+    <li *ngFor="let comment of comments">{{ comment }}</li>
+  </ul>
+</div>
+
+<div id="main-content" class="container">
+  <h2>YouTube Comments Scraper</h2>
+  <input [(ngModel)]="videoUrl" type="text" placeholder="Enter YouTube URL" />
+  <button (click)="startCountdownFetchAndDisplay()">Start</button>
+</div>
+
+
+</div>
