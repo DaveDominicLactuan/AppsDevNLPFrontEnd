@@ -6,6 +6,8 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ScrapeCommentsComponent } from './scrape-comments/scrape-comments.component';
 import { SearchBarComponent } from './search-bar/search-bar.component';
+import { NgApexchartsModule } from 'ng-apexcharts';
+
 
 @NgModule({
   declarations: [
@@ -16,7 +18,7 @@ import { SearchBarComponent } from './search-bar/search-bar.component';
   imports: [
     BrowserModule,
     AppRoutingModule,  HttpClientModule,
-    FormsModule
+    FormsModule, NgApexchartsModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

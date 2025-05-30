@@ -40,11 +40,38 @@ export class AppComponent {
 
   chartVisible = false;
 
-spamData: ApexNonAxisChartSeries = [];
-spamChartOptions: Partial<ApexCharts.ApexOptions> = {};
+// spamData: ApexNonAxisChartSeries = [];
+// spamChartOptions: Partial<ApexCharts.ApexOptions> = {};
 
+// toxicityData: ApexAxisChartSeries = [];
+// toxicityChartOptions: Partial<ApexCharts.ApexOptions> = {};
+  // showCharts: any;
+
+  showCharts = false;
+
+spamData: ApexNonAxisChartSeries = [];
 toxicityData: ApexAxisChartSeries = [];
-toxicityChartOptions: Partial<ApexCharts.ApexOptions> = {};
+
+spamChartOptions: {
+  chart: ApexChart;
+  labels: string[];
+  title: ApexTitleSubtitle;
+} = {
+  chart: { type: 'pie' },
+  labels: [],
+  title: { text: '' }
+};
+
+toxicityChartOptions: {
+  chart: ApexChart;
+  xaxis: ApexXAxis;
+  title: ApexTitleSubtitle;
+} = {
+  chart: { type: 'bar' },
+  xaxis: { categories: [] },
+  title: { text: '' }
+};
+
 
 resetUI(): void {
   this.showSearchUI = false;
@@ -501,7 +528,6 @@ startCountdownFetchAndDisplay(): void {
   this.error = '';
   this.comments = [];
 
-  // Spinner
   const spinner = document.createElement('div');
   spinner.className = 'spinner';
   spinner.style.margin = '50px auto';
@@ -513,7 +539,6 @@ startCountdownFetchAndDisplay(): void {
   spinner.style.animation = 'spin 1s linear infinite';
   content.appendChild(spinner);
 
-  // Logo image
   const img = document.createElement('img');
   img.src = 'assets/angular.png';
   img.alt = 'Angular Logo';
@@ -525,6 +550,7 @@ startCountdownFetchAndDisplay(): void {
 
   console.log(`Countdown starting...`);
   this.countdown = 5;
+
   this.interval = setInterval(() => {
     console.log(`${this.countdown}s left`);
     this.countdown--;
@@ -533,7 +559,6 @@ startCountdownFetchAndDisplay(): void {
       clearInterval(this.interval);
       this.countdownStarted = false;
       this.countdownDone = true;
-
       this.loading = true;
 
       this.youtubeService.scrapeComments(this.videoUrl).subscribe({
@@ -542,7 +567,7 @@ startCountdownFetchAndDisplay(): void {
           this.loading = false;
           this.comments = response.comments || [];
 
-          content.innerHTML = ''; // Clear spinner + image
+          content.innerHTML = '';
 
           const mainBox = document.createElement('div');
           mainBox.style.width = '800px';
@@ -567,13 +592,16 @@ startCountdownFetchAndDisplay(): void {
           headerBox.style.textAlign = 'center';
           mainBox.appendChild(headerBox);
 
+          // ✅ Initialize data for charts
+          const spamCounts = { Spam: 0, 'Not Spam': 0, Undefined: 0 };
+          const toxicityValues: number[] = [];
+
           this.comments.forEach((commentObj: any) => {
             const wrapper = document.createElement('div');
             wrapper.style.display = 'flex';
             wrapper.style.gap = '10px';
             wrapper.style.alignItems = 'flex-start';
 
-            // Comment box
             const commentBox = document.createElement('div');
             commentBox.textContent = commentObj.text;
             commentBox.style.width = '550px';
@@ -593,7 +621,6 @@ startCountdownFetchAndDisplay(): void {
             commentBox.title = 'Click to view full comment';
             commentBox.onclick = () => showPopup(commentObj.text);
 
-            // Spam label box
             const labelWrapper = document.createElement('div');
             labelWrapper.style.display = 'flex';
             labelWrapper.style.flexDirection = 'column';
@@ -605,46 +632,89 @@ startCountdownFetchAndDisplay(): void {
             labelWrapper.style.borderRadius = '8px';
             labelWrapper.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.1)';
 
-          const spamLabel = document.createElement('div');
-spamLabel.textContent = commentObj.spam !== null ? commentObj.spam : 'undefined';
-spamLabel.style.fontWeight = 'bold';
-spamLabel.style.marginBottom = '10px';
+            const spamLabel = document.createElement('div');
+            spamLabel.textContent = commentObj.spam !== null ? commentObj.spam : 'undefined';
+            spamLabel.style.fontWeight = 'bold';
+            spamLabel.style.marginBottom = '10px';
 
-const divider = document.createElement('div');
-divider.style.borderTop = '1px solid #ccc';
-divider.style.width = '100%';
-divider.style.margin = '6px 0';
+            const divider = document.createElement('div');
+            divider.style.borderTop = '1px solid #ccc';
+            divider.style.width = '100%';
+            divider.style.margin = '6px 0';
 
-const toxicityTitle = document.createElement('div');
-toxicityTitle.textContent = 'Toxicity Scale';
-toxicityTitle.style.fontSize = '12px';
-toxicityTitle.style.fontWeight = 'bold';
-toxicityTitle.style.marginTop = '4px';
+            const toxicityTitle = document.createElement('div');
+            toxicityTitle.textContent = 'Toxicity Scale';
+            toxicityTitle.style.fontSize = '12px';
+            toxicityTitle.style.fontWeight = 'bold';
+            toxicityTitle.style.marginTop = '4px';
 
-const toxicityValue = document.createElement('div');
-toxicityValue.textContent = commentObj.toxicity !== null ? commentObj.toxicity : 'undefined';
-toxicityValue.style.fontSize = '14px';
-toxicityValue.style.marginTop = '4px';
+            const toxicityValue = document.createElement('div');
+            toxicityValue.textContent = commentObj.toxicity !== null ? commentObj.toxicity : 'undefined';
+            toxicityValue.style.fontSize = '14px';
+            toxicityValue.style.marginTop = '4px';
 
-labelWrapper.appendChild(spamLabel);
-labelWrapper.appendChild(divider);
-labelWrapper.appendChild(toxicityTitle);
-labelWrapper.appendChild(toxicityValue);
+            labelWrapper.appendChild(spamLabel);
+            labelWrapper.appendChild(divider);
+            labelWrapper.appendChild(toxicityTitle);
+            labelWrapper.appendChild(toxicityValue);
 
             wrapper.appendChild(commentBox);
             wrapper.appendChild(labelWrapper);
             mainBox.appendChild(wrapper);
+
+            // ✅ Data processing (moved inside loop)
+            if (commentObj.spam === true || commentObj.spam === 'Spam') spamCounts.Spam++;
+            else if (commentObj.spam === false || commentObj.spam === 'Not Spam') spamCounts['Not Spam']++;
+            else spamCounts.Undefined++;
+
+            toxicityValues.push(typeof commentObj.toxicity === 'number' ? commentObj.toxicity : 0);
           });
 
-          content.appendChild(mainBox);
+          // ✅ Toggle chart button
+          const chartToggleBtn = document.createElement('button');
+          chartToggleBtn.innerText = 'View Charts';
+          chartToggleBtn.style.cssText = `
+            margin: 20px auto;
+            display: block;
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            background-color: #1976d2;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+          `;
+         chartToggleBtn.onclick = () => {
+  this.toggleChartModal();
+  chartToggleBtn.innerText = this.showCharts ? 'Hide Charts' : 'View Charts';
+};
 
-          // Background image
+          mainBox.appendChild(chartToggleBtn);
+
+          // ✅ Assign chart data for Angular component rendering
+          this.spamData = [spamCounts.Spam, spamCounts['Not Spam'], spamCounts.Undefined];
+          this.spamChartOptions = {
+            chart: { type: 'pie' },
+            labels: ['Spam', 'Not Spam', 'Undefined'],
+            title: { text: 'Spam Distribution' }
+          };
+
+          this.toxicityData = [{
+            name: 'Toxicity',
+            data: toxicityValues
+          }];
+          this.toxicityChartOptions = {
+            chart: { type: 'bar' },
+            xaxis: { categories: toxicityValues.map((_, i) => `Comment ${i + 1}`) },
+            title: { text: 'Toxicity Levels by Comment' }
+          };
+
+          content.appendChild(mainBox);
           document.body.style.backgroundImage = "url('https://source.unsplash.com/random/1920x1080')";
           document.body.style.backgroundSize = 'cover';
           document.body.style.backgroundPosition = 'center';
           document.body.style.backgroundRepeat = 'no-repeat';
 
-          // Modal
           let modal = document.getElementById('comment-modal') as HTMLDivElement;
           if (!modal) {
             modal = document.createElement('div');
@@ -686,7 +756,6 @@ labelWrapper.appendChild(toxicityValue);
             modal.style.visibility = 'visible';
           }
 
-           // Reset button (bottom left)
           const resetButton = document.createElement('button');
           resetButton.textContent = 'Reset UI';
           resetButton.style.position = 'fixed';
@@ -700,130 +769,10 @@ labelWrapper.appendChild(toxicityValue);
           resetButton.style.cursor = 'pointer';
           resetButton.onclick = () => {
             document.getElementById('main-content')!.innerHTML = '';
-            this.appendSearchForm(); // see below
+            this.appendSearchForm();
             resetButton.remove();
           };
           document.body.appendChild(resetButton);
-
-          // Add "View Charts" button
-const chartBtn = document.createElement('button');
-chartBtn.innerText = 'View Charts';
-chartBtn.style.margin = '20px auto';
-chartBtn.style.display = 'block';
-chartBtn.style.padding = '10px 20px';
-chartBtn.style.borderRadius = '10px';
-chartBtn.style.border = 'none';
-chartBtn.style.backgroundColor = '#1976d2';
-chartBtn.style.color = 'white';
-chartBtn.style.fontWeight = 'bold';
-chartBtn.style.cursor = 'pointer';
-mainBox.appendChild(chartBtn);
-
-// Prepare chart data
-const spamCounts = { Spam: 0, 'Not Spam': 0, Undefined: 0 };
-const toxicityValues: number[] = [];
-
-this.comments.forEach((c: any) => {
-  if (c.spam === true || c.spam === 'Spam') spamCounts.Spam++;
-  else if (c.spam === false || c.spam === 'Not Spam') spamCounts['Not Spam']++;
-  else spamCounts.Undefined++;
-
-  toxicityValues.push(typeof c.toxicity === 'number' ? c.toxicity : 0);
-});
-
-// Pie Chart Data (Spam Status)
-this.spamData = [spamCounts.Spam, spamCounts['Not Spam'], spamCounts.Undefined];
-this.spamChartOptions = {
-  chart: { type: 'pie' },
-  labels: ['Spam', 'Not Spam', 'Undefined'],
-  title: { text: 'Spam Distribution' }
-};
-
-// Bar Chart Data (Toxicity Levels)
-this.toxicityData = [{
-  name: 'Toxicity',
-  data: toxicityValues
-}];
-this.toxicityChartOptions = {
-  chart: { type: 'bar' },
-  xaxis: { categories: toxicityValues.map((_, i) => `Comment ${i + 1}`) },
-  title: { text: 'Toxicity Levels by Comment' }
-};
-
-// Modal Setup
-let chartModal = document.getElementById('chart-modal') as HTMLDivElement;
-if (!chartModal) {
-  chartModal = document.createElement('div');
-  chartModal.id = 'chart-modal';
-  chartModal.style.position = 'fixed';
-  chartModal.style.top = '0';
-  chartModal.style.left = '0';
-  chartModal.style.width = '100vw';
-  chartModal.style.height = '100vh';
-  chartModal.style.background = 'rgba(0, 0, 0, 0.6)';
-  chartModal.style.display = 'flex';
-  chartModal.style.flexDirection = 'column';
-  chartModal.style.justifyContent = 'center';
-  chartModal.style.alignItems = 'center';
-  chartModal.style.zIndex = '10000';
-  chartModal.style.visibility = 'hidden';
-
-  const modalContent = document.createElement('div');
-  modalContent.style.background = 'white';
-  modalContent.style.padding = '20px';
-  modalContent.style.borderRadius = '12px';
-  modalContent.style.width = '90%';
-  modalContent.style.maxWidth = '1000px';
-  modalContent.style.maxHeight = '80vh';
-  modalContent.style.overflowY = 'auto';
-  modalContent.innerHTML = `
-    <div id="spam-chart" style="height: 300px;"></div>
-    <div id="toxicity-chart" style="height: 300px; margin-top: 40px;"></div>
-    <button id="close-chart-modal" style="
-      margin-top: 20px;
-      background-color: #d32f2f;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-    ">Close</button>
-  `;
-
-  chartModal.appendChild(modalContent);
-  document.body.appendChild(chartModal);
-
-  document.getElementById('close-chart-modal')?.addEventListener('click', () => {
-    chartModal.style.visibility = 'hidden';
-  });
-}
-
-chartBtn.onclick = () => {
-  chartModal.style.visibility = 'visible';
-
-  // Render ApexCharts (wait for modal to be visible)
-  setTimeout(() => {
-    const pie = new ApexCharts(document.querySelector('#spam-chart'), {
-      series: this.spamData,
-      chart: { type: 'pie' },
-      labels: ['Spam', 'Not Spam', 'Undefined'],
-      title: { text: 'Spam Distribution' }
-    });
-    pie.render();
-
-    const bar = new ApexCharts(document.querySelector('#toxicity-chart'), {
-      series: this.toxicityData,
-      chart: { type: 'bar' },
-      xaxis: {
-        categories: this.toxicityData[0].data.map((_, i) => `Comment ${i + 1}`)
-      },
-      title: { text: 'Toxicity Levels by Comment' }
-    });
-    bar.render();
-  }, 200);
-};
-
-          
         },
         error: (err) => {
           this.error = err.error?.error || 'An error occurred';
@@ -914,6 +863,10 @@ appendSearchForm(): void {
       this.startCountdownFetchAndDisplay();
     });
   }
+}
+
+toggleChartModal(): void {
+  this.showCharts = !this.showCharts;
 }
 
 

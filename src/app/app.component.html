@@ -31,5 +31,62 @@
 
 </div>
 
+<!-- Toggle Charts Modal Button -->
+<!-- <button (click)="toggleChartModal()"
+        style="margin: 20px auto; display: block; padding: 10px 20px; border-radius: 10px; background-color: #1976d2; color: white; font-weight: bold; cursor: pointer;">
+  {{ showCharts ? 'Hide Charts' : 'View Charts' }}
+</button> -->
+
+
+<!-- Chart Section -->
+<!-- <div *ngIf="showCharts" style="width: 90%; margin: 20px auto;">
+  <div style="margin-bottom: 40px;">
+    <apx-chart [series]="spamData"
+               [chart]="spamChartOptions.chart"
+               [labels]="spamChartOptions.labels"
+               [title]="spamChartOptions.title"
+               style="display: block;"></apx-chart>
+  </div>
+
+  <div>
+    <apx-chart [series]="toxicityData"
+               [chart]="toxicityChartOptions.chart"
+               [xaxis]="toxicityChartOptions.xaxis"
+               [title]="toxicityChartOptions.title"
+               style="display: block;"></apx-chart>
+  </div>
+</div> -->
+
+<!-- Chart Modal -->
+<div *ngIf="showCharts"
+     style="position: fixed; top: 0; left: 0; width: 1000px; height: 1200px; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1000;">
+  
+  <div style="width: 90%; max-width: 1000px; background: white; padding: 20px; border-radius: 12px; position: relative; overflow-y: auto; max-height: 90vh;">
+    
+    <!-- Close button -->
+    <button (click)="showCharts = false"
+            style="position: absolute; top: 10px; right: 10px; background: #ccc; border: none; border-radius: 50%; width: 30px; height: 30px; font-weight: bold; cursor: pointer;">×</button>
+    
+    <!-- Chart Content -->
+    <div style="margin-bottom: 40px;">
+      <apx-chart *ngIf="spamChartOptions.chart"
+                 [series]="spamData"
+                 [chart]="spamChartOptions.chart"
+                 [labels]="spamChartOptions.labels"
+                 [title]="spamChartOptions.title">
+      </apx-chart>
+    </div>
+
+    <div>
+      <apx-chart *ngIf="toxicityChartOptions.chart"
+                 [series]="toxicityData"
+                 [chart]="toxicityChartOptions.chart"
+                 [xaxis]="toxicityChartOptions.xaxis"
+                 [title]="toxicityChartOptions.title">
+      </apx-chart>
+    </div>
+  </div>
+</div>
+
 
 </div>
